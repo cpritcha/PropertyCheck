@@ -1,4 +1,4 @@
-The JuliaCheck.jl package is licensed under the MIT "Expat" License:
+The PropertyCheck.jl package is licensed under the MIT "Expat" License:
 
 > Copyright (c) 2015: Calvin Pritchard.
 >
