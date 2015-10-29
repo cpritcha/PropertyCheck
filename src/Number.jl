@@ -61,7 +61,7 @@ function signeds{T <: Signed}(
     specialvalues::Vector{T}=_specialvalues(T, min, max),
     p::Bernoulli=Bernoulli(0.1),
     shrinker=NoShrinker())
-    
+
     NumberStrategy(DiscreteUniform(min, max), specialvalues, p, shrinker)
 end
 
@@ -80,15 +80,16 @@ function unsigneds{T <: Unsigned}(
     specialvalues::Vector{T}=_specialvalues(T, min, max),
     p::Bernoulli=Bernoulli(0.1),
     shrinker=NoShrinker())
-    
+
     NumberStrategy(DiscreteUniform(min, max), specialvalues, p, shrinker)
 end
 
 function arbitrary{D, T}(strategy::NumberStrategy{D, T})
     if Bool(rand(strategy.p))
-        return convert(T, rand(strategy.specialvalues))
-    else
-        return convert(T, rand(strategy.dist))
+        if length(strategy.specialvalues) > 0
+            return convert(T, rand(strategy.specialvalues))
+        end
     end
+    return convert(T, rand(strategy.dist))
 end
 shrink{T <: Number}(x::T, strategy::NumberStrategy) = Task(() -> nothing)

@@ -187,6 +187,8 @@ function arbitrary{TE}(strategy::TupleStrategy{TE})
     map(arbitrary, strategy.element_strategies)
 end
 
+shrink(x, strategy::TupleStrategy) = Task(() -> nothing)
+
 # ----- Types -----
 immutable TypeStrategy{TE} <: AbstractStrategy
     constructor

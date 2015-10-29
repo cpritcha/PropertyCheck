@@ -4,6 +4,3 @@
 
 # Jupyter
 *.ipynb_checkpoints
-
-# Docs
-doc

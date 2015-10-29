@@ -22,6 +22,21 @@ Return type of the `arbitrary` function
 """
 returntype(strategy::Type{AbstractStrategy}) = error("returntype not implemented for type $(typeof(strategy))")
 
+immutable CounterexampleError{T} <: Exception
+    n_tests::Int
+    n_shrinks::Int
+    counterexample::T
+end
+
+function Base.showerror(io::IO, ex::CounterexampleError)
+    print(io, """
+    Found counterexample after $(ex.n_tests) tests, $(ex.n_shrinks) shrinks:
+        
+    counterexample: $(ex.counterexample)
+    
+    """)
+end
+
 """
 Search method to find a counterexample in the event of propositions
 failure.
@@ -29,23 +44,25 @@ failure.
 Finds smaller counterexamples by recursively shrinking bad counterexamples
 until no smaller counterexample can be found.
 """
-function find_minimal_counterexample(prop, arg, strategy)
+function find_minimal_counterexample(prop, args::Tuple, strategy::AbstractStrategy)
     cand_feas = false
-    arg_old = deepcopy(arg)
+    args_old = deepcopy(args)
+    n_shrinks = 0
     while true
-        shrink_strategies = shrink(arg_old, strategy)
-        for arg_new in shrink_strategies
-            if !prop(arg_new)
+        shrink_strategies = shrink(args_old, strategy)
+        for args_new in shrink_strategies
+            if !prop(args_new...)
                 cand_feas = true
-                arg_old = arg_new
+                args_old = args_new
                 break
             end
         end
         
         if !cand_feas
-            return arg_old
+            return n_shrinks, args_old
         end
         cand_feas = false
+        n_shrinks += 1
     end
 end
 
@@ -54,11 +71,15 @@ Generate `n` test samples using `strategy` on a proposition (`prop`).
 
 If the proposition holds for all test samples then the test passes
 """
-function forAll(prop, strategy; n::Int=100)
+function forAll(prop, strategies::Tuple; 
+                n::Int=100)
+    strategy = tuples(strategies...)
     for i=1:n
-        arg = arbitrary(strategy)
-        if !prop(arg)
-            return find_minimal_counterexample(prop, arg, strategy)
+        args = arbitrary(strategy)
+        if !prop(args...)
+            n_shrinks, example = find_minimal_counterexample(prop, args, strategy)
+            throw(CounterexampleError(i, n_shrinks, example))
         end
     end
+    true
 end
