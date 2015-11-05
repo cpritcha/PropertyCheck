@@ -93,3 +93,14 @@ function arbitrary{D, T}(strategy::NumberStrategy{D, T})
     return convert(T, rand(strategy.dist))
 end
 shrink{T <: Number}(x::T, strategy::NumberStrategy) = Task(() -> nothing)
+
+# ----- Booleans -----
+immutable BoolStrategy <: AbstractStrategy
+    bernoulli::Bernoulli
+end
+BoolStrategy(p::Float64) = BoolStrategy(Bernoulli(p))
+
+bools(; p=0.5) = BoolStrategy(p)
+
+arbitrary(strategy::BoolStrategy) = rand(strategy.bernoulli)
+shrink(x::Bool, strategy::BoolStrategy) = Bool[]

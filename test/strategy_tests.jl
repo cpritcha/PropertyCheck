@@ -22,6 +22,7 @@ const justf10 = pc.just(10.0)
 const signeds_0to10 = pc.signeds(0, 10)
 const signeds_5to10 = pc.signeds(5, 10)
 const floats_0to10 = pc.floats(0.0, 10.0)
+const bools = pc.bools()
 
 const utf8strings_e0to127_l5to10 = pc.utf8strings(0, 127, signeds_5to10)
 
@@ -55,6 +56,8 @@ length_between(x, lb, ub) = between(length(x), lb, ub)
 
 @randtest pc.forAll(between, (floats_0to10, justf0, justf10))
 @test collect(pc.shrink(5.0, floats_0to10)) == Any[]
+
+@test collect(pc.shrink(true, bools)) == Bool[]
 
 # ----- UTF8Strings -----
 
